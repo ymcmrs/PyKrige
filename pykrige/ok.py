@@ -160,7 +160,7 @@ class OrdinaryKriging:
                  variogram_parameters=None, variogram_function=None, nlags=6,
                  weight=False, anisotropy_scaling=1.0, anisotropy_angle=0.0,
                  verbose=False, enable_plotting=False, enable_statistics=False,
-                 coordinates_type='euclidean'):
+                 coordinates_type='euclidean', used_bin_ratio = 1.0):
 
         # Code assumes 1D input arrays of floats. Ensures that any extraneous
         # dimensions don't get in the way. Copies are created to avoid any
@@ -226,17 +226,19 @@ class OrdinaryKriging:
         else:
             self.variogram_function = self.variogram_dict[self.variogram_model]
 
+        self.used_bin_ratio = used_bin_ratio
+        
         if self.verbose:
             print("Initializing variogram model...")
 
         vp_temp = _make_variogram_parameter_list(self.variogram_model,
                                                  variogram_parameters)
-        self.lags, self.semivariance, self.variogram_model_parameters = \
+        self.lags, self.semivariance, self.variogram_model_parameters, self.semivariance_std = \
             _initialize_variogram_model(np.vstack((self.X_ADJUSTED,
                                                    self.Y_ADJUSTED)).T,
                                         self.Z, self.variogram_model, vp_temp,
                                         self.variogram_function, nlags,
-                                        weight, self.coordinates_type)
+                                        weight, self.coordinates_type, self.used_bin_ratio)
 
         if self.verbose:
             print("Coordinates type: '%s'" % self.coordinates_type, '\n')
@@ -349,7 +351,7 @@ class OrdinaryKriging:
         # See note above about the 'use_psill' kwarg...
         vp_temp = _make_variogram_parameter_list(self.variogram_model,
                                                  variogram_parameters)
-        self.lags, self.semivariance, self.variogram_model_parameters = \
+        self.lags, self.semivariance, self.variogram_model_parameters, self.semivariance_std = \
             _initialize_variogram_model(np.vstack((self.X_ADJUSTED,
                                                    self.Y_ADJUSTED)).T,
                                         self.Z, self.variogram_model, vp_temp,

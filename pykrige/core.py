@@ -343,7 +343,7 @@ def _make_variogram_parameter_list(variogram_model, variogram_model_parameters):
 
 def _initialize_variogram_model(X, y, variogram_model,
                                 variogram_model_parameters, variogram_function,
-                                nlags, weight, coordinates_type):
+                                nlags, weight, coordinates_type, used_bin_ratio):
     """Initializes the variogram model for kriging. If user does not specify
     parameters, calls automatic variogram estimation routine.
     Returns lags, semivariance, and variogram model parameters.
@@ -444,7 +444,8 @@ def _initialize_variogram_model(X, y, variogram_model,
 
     lags = np.zeros(nlags)
     semivariance = np.zeros(nlags)
-
+    std = np.zeros(nlags)
+    
     for n in range(nlags):
         # This 'if... else...' statement ensures that there are data
         # in the bin so that numpy can actually find the mean. If we
@@ -453,12 +454,20 @@ def _initialize_variogram_model(X, y, variogram_model,
         if d[(d >= bins[n]) & (d < bins[n + 1])].size > 0:
             lags[n] = np.mean(d[(d >= bins[n]) & (d < bins[n + 1])])
             semivariance[n] = np.mean(g[(d >= bins[n]) & (d < bins[n + 1])])
+            std[n] = np.std(g[(d >= bins[n]) & (d < bins[n + 1])])
         else:
             lags[n] = np.nan
             semivariance[n] = np.nan
+            std[n] = np.nan
 
     lags = lags[~np.isnan(semivariance)]
     semivariance = semivariance[~np.isnan(semivariance)]
+    
+    n0 = len(lags)
+    n1 = int(n0*used_bin_ratio)
+    lags = lags[0:n1]
+    semivariance = semivariance[0:n1]
+    std = std[0:n1]
 
     # a few tests the make sure that, if the variogram_model_parameters
     # are supplied, they have been supplied as expected...
@@ -480,8 +489,9 @@ def _initialize_variogram_model(X, y, variogram_model,
             variogram_model_parameters = \
                 _calculate_variogram_model(lags, semivariance, variogram_model,
                                            variogram_function, weight)
-
-    return lags, semivariance, variogram_model_parameters
+    
+    
+    return lags, semivariance, variogram_model_parameters, std
 
 
 def _variogram_residuals(params, x, y, variogram_function, weight):
