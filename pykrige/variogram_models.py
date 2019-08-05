@@ -73,3 +73,43 @@ def hole_effect_variogram_model(m, d):
     range_ = float(m[1])
     nugget = float(m[2])
     return psill * (1. - (1.-d/(range_/3.)) * np.exp(-d/(range_/3.))) + nugget
+
+
+########## Residual 
+
+def linear_variogram_model_residual(m, d, y):
+    """Linear model, m is [slope, nugget]"""
+
+    return y - linear_variogram_model(m, d)
+
+
+def power_variogram_model_residual(m, d, y):
+    """Power model, m is [scale, exponent, nugget]"""
+
+    return y - power_variogram_model(m, d)
+
+
+def gaussian_variogram_model_residual(m, d, y):
+    """Gaussian model, m is [psill, range, nugget]"""
+    return y - gaussian_variogram_model(m, d)
+
+
+def exponential_variogram_model_residual(m, d, y):
+    """Exponential model, m is [psill, range, nugget]"""
+
+    return y - exponential_variogram_model(m, d)
+
+
+def spherical_variogram_model_residual(m, d, y):
+    """Spherical model, m is [psill, range, nugget]"""
+
+    return y - spherical_variogram_model(m, d)
+
+def hole_effect_variogram_model_residual(m, d, y):
+    """Hole Effect model, m is [psill, range, nugget]"""
+
+    return y - hole_effect_variogram_model(m, d)
+
+
+
+
