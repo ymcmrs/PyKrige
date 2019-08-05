@@ -29,6 +29,7 @@ Copyright (c) 2015-2018, PyKrige Developers
 import numpy as np
 from scipy.spatial.distance import pdist, squareform, cdist
 from scipy.optimize import least_squares
+from scipy.optimize import leastsq
 
 eps = 1.e-10   # Cutoff for comparison to zero
 
@@ -588,9 +589,11 @@ def _calculate_variogram_model(lags, semivariance, variogram_model,
     # potential outliers (weird/skewed points)
     res = least_squares(_variogram_residuals, x0, bounds=bnds, loss='soft_l1',
                         args=(lags, semivariance, variogram_function, weight))
-
+    #print(x0)
+    #res = leastsq(_variogram_residuals, x0,args=(lags, semivariance,variogram_function, weight))
+    #print(res[0])
     return res.x
-
+    #return res[0] 
 
 def _krige(X, y, coords, variogram_function,
            variogram_model_parameters, coordinates_type):
